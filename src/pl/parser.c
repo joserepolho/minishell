@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:47 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/09 20:27:40 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/11 05:45:09 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ bool	parse_input(t_mini *mini)
 	raw_commands = ft_split(mini->input.raw_line, PIPE);
 	if (raw_commands == NULL || raw_commands[0] == NULL)
 	{
-		mini->commands = parse_command(mini->input.raw_line);
+		mini->commands = parse_c
+#include "../../includes/push_swap.h"ommand(mini->input.raw_line);
 		return ((bool)mini->commands);
 	}
 	commands = mini->input.pipe_c + 1;
@@ -42,6 +43,7 @@ bool	parse_input(t_mini *mini)
 
 bool	should_split(char *line)
 {
+#include "../../includes/push_swap.h"
 	return (redir_size(line) > 0 || *line == '|');
 }
 

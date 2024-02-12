@@ -1,31 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mini.c                                             :+:      :+:    :+:   */
+/*   signal_handle.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/07 14:44:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/12 03:33:59 by joaoribe         ###   ########.fr       */
+/*   Created: 2024/02/10 02:42:06 by joaoribe          #+#    #+#             */
+/*   Updated: 2024/02/10 03:10:51 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	init_mini(t_mini *mini)
+void    prmpt_ctrlc(int signal)
 {
-	mini->command_ret = true;
-	
-	mini->input.raw_line = NULL;
-	mini->input.len = 0;
-	mini->input.pipe_c = 0;
-
-	mini->commands = NULL;
+    (void)signal;
+    printf("\n");
+    rl_on_new_line();
+    rl_replace_line("", 0);
+    rl_redisplay();   
 }
 
-t_mini *mini(void)
+void    sig_init(void)
 {
-	static t_mini mini;
-
-	return (&mini);
+	signal(SIGINT, prmpt_ctrlc);
+	signal(SIGQUIT, SIG_IGN);
 }

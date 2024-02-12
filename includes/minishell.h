@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:27:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/09 16:51:49 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/12 05:44:56 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <readline/readline.h>
 # include <stdbool.h>
 # include <stdio.h>
+# include <signal.h>
 
 # define PROMPT " > "
 # define HEREDOC_PROMPT "heredoc>"
@@ -45,8 +46,9 @@ enum					e_redir_type
 typedef struct s_input
 {
 	char				*raw_line;
+	int					cmd_input;
 	size_t				len;
-	size_t				pipe_c;
+	size_t				pipe_c[2];
 }						t_input;
 
 typedef struct s_redir
@@ -57,7 +59,7 @@ typedef struct s_redir
 
 typedef struct s_redirs
 {
-	t_redir				*redirs;
+	t_redir				redirs;
 	size_t				redir_c;
 }						t_redirs;
 
@@ -65,6 +67,8 @@ typedef struct s_command
 {
 	char				*cmd_name;
 	char				*raw_command;
+	int					pipes; // poe nesta variavel o nr de pipes encontrados pfv
+	int					*pipe_location; // poe nesta variavel a localizacao dos pipes na lista dos comandos. Da malloc consoante o nr de pipes
 	char				**args;
 	t_redirs			redirs;
 	struct s_command	*next;
@@ -79,6 +83,13 @@ typedef struct s_mini
 
 // main.c
 int						main(int ac, char **av, char **env);
+
+// free.c
+void    				free_shell(t_mini *mini, char *err, int status);
+void    				free_cmds(t_command **cmds);
+
+// signal_handle.c
+void    				sig_init(void);
 
 // input.c
 char					*get_input(bool prompt);
@@ -111,4 +122,20 @@ char					*get_next_section(char **line);
 size_t					redir_size(char *line);
 size_t					count_args(char *line);
 char					*get_next_arg(char **line);
+
+// ex
+// \ execution.c
+void    				ft_execution(t_mini *mini);
+void					child_process(t_mini *mini, t_command *cmd, char *first_cmd, char *lst_cmd);
+void					parent_process(t_mini *mini, t_command *cmd, char *first_cmd, char *lst_cmd);
+// \ execute.c
+void					execution(t_mini *mini, t_command *cmd);
+char					*get_path(char *cmd, char **ev);
+char					*cmd_path(char **ev);
+void					ft_free(char **s);
+
+// built-ins
+// \ built-ins_utils.c
+int						if_builtin(char *s);
+void					built_in(t_mini *mini, char **args);
 #endif

@@ -1,31 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mini.c                                             :+:      :+:    :+:   */
+/*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/07 14:44:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/12 03:33:59 by joaoribe         ###   ########.fr       */
+/*   Created: 2024/02/12 03:21:49 by joaoribe          #+#    #+#             */
+/*   Updated: 2024/02/12 05:44:36 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	init_mini(t_mini *mini)
+void    bi_cd(t_mini *mini, char **av)
 {
-	mini->command_ret = true;
-	
-	mini->input.raw_line = NULL;
-	mini->input.len = 0;
-	mini->input.pipe_c = 0;
-
-	mini->commands = NULL;
-}
-
-t_mini *mini(void)
-{
-	static t_mini mini;
-
-	return (&mini);
+    char    *olddir;
+    
+    if (!getcwd(dir))
 }
