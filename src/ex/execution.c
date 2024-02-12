@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 22:27:57 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/12 04:07:05 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/12 06:00:18 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ void    ft_execution(t_mini *mini)
 	l_cmd = ft_lstlast(mini->commands);
 	if (mini->commands->args && mini->commands->args[0])
 	{
-		if (!(mini->commands->next) && if_builtin(mini->commands->args[0]))
+		if (!(mini->commands->next) && !ft_strncmp(mini->commands->args[0], "exit", 4))
 		{
-			built_in(); // executar built-in direto se for so 1 comando
+			bi_exit(); // executar built-in direto se for so 1 comando
 			pid = 0;
 		}
 		else
