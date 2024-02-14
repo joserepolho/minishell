@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:37 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/10 04:59:24 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/14 04:43:31 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@ int	main(int ac, char **av, char **env)
 	(void)env;
 	/* TODO: Load env? */
 	init_mini(mini());
+	mini()->env_list = set_env(env);
+	if (!(mini()->env_list))
+		free_shell(mini(), "Error\nMalloc failed!\n", 1);
 	while (1)
 	{
 		sig_init(); //CTRLC e CTRL/ durante prompt;

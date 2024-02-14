@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 23:03:13 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/12 03:33:33 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/14 01:12:13 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,8 @@ void    free_shell(t_mini *mini, char *err, int status)
 	free(mini);
     // funcao para limpar envs do export
 	rl_clear_history();
-    write(2, err, ft_strlen(err));
+    if (err)
+        write(2, err, ft_strlen(err));
     close(0);
     close(1);
     exit(status);

@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 02:29:23 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/12 05:35:59 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/14 00:07:14 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	execution(t_mini *mini, t_command *cmd)
 		built_in();
 	else
 	{
-		path = get_path(cmd->args[0], envelope); // extrai directories da PATH var
+		path = get_path(cmd->args[0], envelope); // extrai directories da PATH var, add env
 		if (execve(path, cmd->args[0], envelope) < 0)
 		{
 			free_cmds(&cmd);

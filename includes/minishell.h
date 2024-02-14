@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:27:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/12 05:44:56 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/14 04:41:39 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ typedef struct s_mini
 	t_input				input;
 	t_command			*commands;
 	bool				command_ret;
+	t_list				*env_list;
 }						t_mini;
 
 // main.c
@@ -134,8 +135,15 @@ char					*get_path(char *cmd, char **ev);
 char					*cmd_path(char **ev);
 void					ft_free(char **s);
 
-// built-ins
+// b-ins
 // \ built-ins_utils.c
 int						if_builtin(char *s);
 void					built_in(t_mini *mini, char **args);
+// \ cd
+// \ echo
+void    bi_echo(t_mini *mini, char **av);
+// \ env
+// \ export
+// \ pwd
+// \ unset
 #endif

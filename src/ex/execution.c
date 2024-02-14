@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 22:27:57 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/12 06:00:18 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/14 01:19:22 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ void    ft_execution(t_mini *mini)
 	t_command	*l_cmd;
 
 	// sinal caso processo seja interrompido a meio
+	pid = 0;
 	l_cmd = malloc(sizeof(t_command));
 	if (!l_cmd)
 		free_shell(mini, "Error\nMalloc failure\n", 1);
@@ -25,10 +26,7 @@ void    ft_execution(t_mini *mini)
 	if (mini->commands->args && mini->commands->args[0])
 	{
 		if (!(mini->commands->next) && !ft_strncmp(mini->commands->args[0], "exit", 4))
-		{
-			bi_exit(); // executar built-in direto se for so 1 comando
-			pid = 0;
-		}
+			free_shell(mini, NULL, mini->commands->args[1]); // executar built-in direto se for so 1 comando exit
 		else
 		{
 			while (mini->commands)
