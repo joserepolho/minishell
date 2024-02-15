@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:27:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/14 04:41:39 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/15 04:53:21 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <stdbool.h>
 # include <stdio.h>
 # include <signal.h>
+# include <limits.h>
 
 # define PROMPT " > "
 # define HEREDOC_PROMPT "heredoc>"
@@ -140,10 +141,16 @@ void					ft_free(char **s);
 int						if_builtin(char *s);
 void					built_in(t_mini *mini, char **args);
 // \ cd
+void   		 			bi_cd(t_mini *mini, char **av);
 // \ echo
-void    bi_echo(t_mini *mini, char **av);
+void    				bi_echo(t_mini *mini, char **av);
 // \ env
+void					bi_env(t_list *env_list);
 // \ export
+int						ft_strlen_eq(char *s);
+void					free_content(void *content);
+void					delete_var(t_list **head, t_list node_to_del);
+void					bi_export(t_mini *mini, char **av);
 // \ pwd
 // \ unset
 #endif
