@@ -27,7 +27,7 @@ void	free_content(void *content)
 	free(content);
 }
 
-void	delete_var(t_list **head, t_list node_to_del)
+void	delete_var(t_list **head, void *node_to_del)
 {
 	t_list	*current;
 	t_list	*previous;
@@ -36,7 +36,7 @@ void	delete_var(t_list **head, t_list node_to_del)
 	previous = NULL;
 	while (current)
 	{
-		if (current->content == node_to_del)
+		if (!ft_strncmp(current->content, node_to_del, ft_strlen(node_to_del)))
 		{
 			if (previous)
 				previous->next = current->next;
@@ -55,14 +55,16 @@ void	bi_export(t_mini *mini, char **av)
 {
 	int		i;
 	t_list	*tmp;
+	t_list	*dtmp;
+	t_list	*exp;
 
-	i = 0;
+	i = -1;
 	tmp = mini->env_list;
-	if (!av[1])
+	if (!av[0])
 	{
 		while (tmp)
 		{
-			printf("declare -x %s\n", tmp->content);
+			printf("declare -x %p\n", tmp->content);
 			tmp = tmp->next;
 		}
 		return ;
@@ -74,12 +76,12 @@ void	bi_export(t_mini *mini, char **av)
 		{
 			if (!ft_strncmp(av[i], tmp->content, ft_strlen_eq(tmp->content)))
 			{
-				delete_var(&(mini->env_list), tmp->content);
-				break ;
+				dtmp = tmp->content;
+				delete_var(&(mini->env_list), dtmp->content);
 			}
 			tmp = tmp->next;
 		}
+		exp = ft_lstnew(ft_strdup((char *)av[i]));
+		ft_lstadd_back(&(mini->env_list), exp);
 	}
-	ft_lstadd_back(&(mini->env_list, ft_lstnew(ft_strjoin("declare -x",
-					av[i]))));
 }

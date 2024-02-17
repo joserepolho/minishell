@@ -1,13 +1,22 @@
-cat aaa >> bbb < ttt
-
-wc -c bbb
-echo -n hello
-export HELLO=123
-export HELLO="beautiful <  world"
 echo $PWD $OLDPWD
 echo "hi" | cat | cat | cat | cat | cat | cat | cat
+ls -l | grep "txt" > files.txt
+cat data.txt | sort | uniq > unique_data.txt
+ps aux | grep "chrome" | wc -l > chrome_processes_count.txt
+find . -type f | grep ".log" | xargs wc -l > log_files_line_count.txt
+tail -n 1000 access.log | awk '{print $1}' | sort | uniq > unique_ip_addresses.txt
+grep "error" error.log | awk '{print $2, $3}' | sort | uniq -c > error_count_by_date.txt
+cat file1.txt file2.txt | grep "pattern" | sed 's/old/new/g' > modified_data.txt
+ls -l | grep "pdf" | awk '{print $9}' | xargs -I {} mv {} pdf_files/
+cat data.txt | awk '{print NF}' | sort -n | tail -n 1 > max_columns_count.txt
+ps aux | grep "firefox" | awk '{print $2}' | xargs kill -9
 /bin/ls
 ls >outfile01
 env | grep USER
 env | < USER
+cat aaa >> bbb < ttt
+wc -c bbb
+echo -n hello
+export HELLO=123
+export HELLO="beautiful <  world"
 env >< USER

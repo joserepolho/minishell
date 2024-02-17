@@ -12,21 +12,24 @@
 
 #include "minishell.h"
 
-void    bi_echo(t_mini *mini, char **av)
+void	bi_echo(char **av)
 {
 	int	i;
 	int	flag;
 
-	i = 1;
+	i = 0;
 	flag = 0;
-    if (!av[1])
-        printf("\n");
-    if (!ft_strncmp(av[1], "-n\0", 3))
+	if (!av[0])
+	{
+		printf("\n");
+		return ;
+	}
+	if (!ft_strncmp(av[0], "-n", 2))
 	{
 		flag = 1;
 		i++;
 	}
-	while (av[i] && av[i][0])
+	while (av[i])
 	{
 		printf("%s", av[i]);
 		i++;

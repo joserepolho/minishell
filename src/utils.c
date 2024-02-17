@@ -6,21 +6,11 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 17:13:51 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/08 18:49:32 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/14 19:58:10 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-bool	is_redir(char *line)
-{
-	if (strncmp(line, REDIR_APPEND_IN, 2) == 0 || strncmp(line,
-			REDIR_APPEND_OUT, 2) == 0)
-		return (true);
-	if (*line == REDIR_IN || *line == REDIR_OUT)
-		return (true);
-	return (false);
-}
 
 enum e_redir_type	redir_type(char *line)
 {
@@ -35,24 +25,30 @@ enum e_redir_type	redir_type(char *line)
 	return (RED_NULL);
 }
 
-bool	ft_isspace(char c)
+void	t_redir_init(t_redir *redir)
 {
-	return (c == ' ' || c == '\t');
+	redir->file = NULL;
+	redir->fd = -1;
+	redir->type = RED_NULL;
 }
 
-char	*ft_strtrim2(char *s1, char const *set)
+void	print_command(t_command *command)
 {
-	size_t	start;
-	size_t	end;
-	char	*trimmed;
+	size_t	i;
 
-	start = 0;
-	while (s1[start] && ft_strchr(set, s1[start]))
-		start++;
-	end = ft_strlen(s1);
-	while (end > start && ft_strchr(set, s1[end - 1]))
-		end--;
-	trimmed = ft_substr(s1, start, end - start);
-	free(s1);
-	return (trimmed);
+	i = 0;
+	printf("cmd_name: |%s|\n", command->cmd_name);
+	printf("args: ");
+	while (command->args[i])
+	{
+		printf("%s ", command->args[i]);
+		i++;
+	}
+	printf("\n");
+	if (command->in.file)
+		printf("redir in type:|%d|file:|%s|\n", command->in.type,
+			command->in.file);
+	if (command->out.file)
+		printf("redir out type:|%d|file:|%s|\n",
+			command->out.type, command->out.file);
 }

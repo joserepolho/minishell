@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:45 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/10 04:27:45 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/14 16:23:51 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/* TODO: check for all types of semantic errors */
 bool	input_error_check(t_mini *mini)
 {
-	/* TODO: check for all types of semantic errors */
 	char	*line_cursor;
 	bool	open_quotes;
 	bool	open_dquotes;
@@ -35,12 +35,13 @@ bool	input_error_check(t_mini *mini)
 		line_cursor++;
 	}
 	mini->input.len = line_cursor - mini->input.raw_line;
-	return (!(open_quotes || open_dquotes));
+	return (!(open_quotes || open_dquotes)
+		&& ft_strlen(mini->input.raw_line) > 0);
 }
 
 bool	skip_spaces(char **line)
 {
 	while (**line == ' ')
 		(*line)++;
-	return (*line);
+	return (**line);
 }

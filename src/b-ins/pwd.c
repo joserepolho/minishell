@@ -16,7 +16,7 @@ void	bi_pwd(t_mini *mini)
 {
 	char	dir[PATH_MAX + 1];
 
-	if (getcwd(dir, PATH_MAX))
-		free_shell(mini, "Error\nFailure getting path!\n", 1);
+	if (!getcwd(dir, PATH_MAX))
+		free_shell(mini, "Error\nFailure getting path!\n", "1");
 	printf("%s\n", dir);
 }

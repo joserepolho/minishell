@@ -1,1 +1,2 @@
-echo "hi" | cat | cat | cat | cat | cat | cat | cat
+cat aaa >> bbb < ttt
+echo -n

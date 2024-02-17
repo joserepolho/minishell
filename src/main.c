@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:37 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/14 04:43:31 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/17 21:56:42 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,20 @@
 
 int	main(int ac, char **av, char **env)
 {
-	//char	**s;
+	t_command	*cmd;
 
+	// char	**s;
 	(void)av;
 	(void)ac;
 	(void)env;
 	/* TODO: Load env? */
+	cmd = NULL;
 	init_mini(mini());
 	mini()->env_list = set_env(env);
 	if (!(mini()->env_list))
-		free_shell(mini(), "Error\nMalloc failed!\n", 1);
+		free_shell(mini(), "Error\nMalloc failed!\n", "1");
 	while (1)
 	{
-		sig_init(); //CTRLC e CTRL/ durante prompt;
 		mini()->input.raw_line = get_input(true);
 		if (!input_error_check(mini()))
 		{
@@ -35,21 +36,19 @@ int	main(int ac, char **av, char **env)
 		}
 		else
 		{
-			// size_t i = 0;
-			parse(mini()->input.raw_line);
-			/*while (s[i])
+			parse_input(mini());
+			cmd = mini()->commands;
+			while (cmd->next != NULL)
 			{
-				printf("s[%zu]: |%s|\n", i, s[i]);
-				i++;
-			}*/
-			// free(mini()->input.raw_line);
-			mini()->input.raw_line = NULL;
-			// parse_input(mini());
+				print_command(cmd->next);
+				cmd = cmd->next;
+				if (cmd->next != NULL)
+					printf("will pipe to: \n");
+			}
+			ft_execution(mini(), env);
+			free_mini(mini());
 		}
-		// process line
-		// free(mini()->input.raw_line);
-		/* TODO: maybe create a mini.input free function */
 	}
-	free_shell(mini(), "Exit successful.\n", 0);
+	free_mini(mini());
 	return (0);
 }

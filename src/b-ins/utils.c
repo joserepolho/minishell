@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   built-ins_utils.c                                  :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 03:56:01 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/17 14:45:28 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/16 20:02:04 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ void	built_in(t_mini *mini, t_command *cmd)
 		bi_echo(cmd->args);
 	else if (!ft_strncmp(cmd->cmd_name, "env", 3))
 		bi_env(mini->env_list);
-	else if (!ft_strncmp(cmd->cmd_name, "exit", 4))
-		bi_exit(mini, cmd->args);
 	else if (!ft_strncmp(cmd->cmd_name, "export", 6))
 		bi_export(mini, cmd->args);
 	else if (!ft_strncmp(cmd->cmd_name, "pwd", 3))

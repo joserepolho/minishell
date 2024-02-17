@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 16:09:31 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/09 20:21:27 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/14 19:26:16 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,67 +14,73 @@
 
 size_t	redir_size(char *line)
 {
-	if (redir_type(line) == RED_AIN || redir_type(line) == RED_AOUT)
+	enum e_redir_type	type;
+
+	type = redir_type(line);
+	if (type == RED_AIN || type == RED_AOUT)
 		return (2);
-	if (redir_type(line) == RED_IN || redir_type(line) == RED_OUT)
+	if (type == RED_IN || type == RED_OUT)
 		return (1);
 	return (0);
 }
 
-size_t	count_args(char *line)
+bool	should_split(char *line)
 {
-	size_t	c;
-	bool	quotes;
-
-	c = 0;
-	quotes = false;
-	while (*line)
-	{
-		skip_spaces(&line);
-		if (redir_size(line))
-		{
-			c++;
-			line += redir_size(line);
-		}
-		else
-		{
-			while (*line && ((!(*line == ' ') && !is_redir(line + 1)) || quotes))
-			{
-				if (*line == QUOTE || *line == DQUOTE)
-					quotes = !quotes;
-				line++;
-			}
-			c++;
-		}
-	}
-	return (c);
+	return (redir_size(line) > 0 || *line == '|' || *line == ' ');
 }
 
-char	*get_next_arg(char **line)
+void	assign_redir(t_command *command, char *redir_file,
+		enum e_redir_type type)
 {
-	size_t	i;
-	char	*arg;
-	bool	quotes;
-
-	i = 0;
-	quotes = false;
-	if (redir_size(*line))
+	if (type == RED_IN || type == RED_AIN)
 	{
-		arg = ft_substr(*line, 0, redir_size(*line));
-		(*line) += redir_size(*line);
-		return (arg);
+		command->in.file = ft_strdup(redir_file);
+		command->in.type = type;
 	}
 	else
 	{
-		while ((*line)[i] && ((!((*line)[i] == ' ') && !is_redir(*line + i))
-				|| quotes))
-		{
-			if ((*line)[i] == QUOTE || (*line)[i] == DQUOTE)
-				quotes = !quotes;
-			i++;
-		}
-		arg = ft_substr(*line, 0, i);
-		(*line) += i;
+		command->out.file = ft_strdup(redir_file);
+		command->out.type = type;
 	}
-	return (arg);
+}
+
+void	assign_args(t_command *command, char **raw_commands, size_t *i,
+		size_t end)
+{
+	size_t	j;
+	size_t	k;
+	char	**args;
+
+	j = 0;
+	while (*i < end && redir_type(raw_commands[*i]) == RED_NULL)
+	{
+		(*i)++;
+		j++;
+	}
+	args = malloc((j + 1) * sizeof(char *));
+	if (!args)
+		return ; /* TODO: malloc error */
+	args[j] = NULL;
+	k = 0;
+	while (k < j)
+	{
+		args[k] = ft_strdup(raw_commands[*i - j + k]);
+		k++;
+	}
+	command->args = args;
+}
+
+void	command_add_back(t_command **command, t_command *new_command)
+{
+	t_command	*last_command;
+
+	if (!*command)
+	{
+		*command = new_command;
+		return ;
+	}
+	last_command = *command;
+	while (last_command && last_command->next)
+		last_command = last_command->next;
+	last_command->next = new_command;
 }

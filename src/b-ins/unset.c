@@ -17,9 +17,8 @@ void	bi_unset(t_mini *mini, char **av)
 	int		i;
 	int		j;
 	t_list	*tmp;
-	int		size_to_eq;
 
-	i = 0;
+	i = -1;
 	j = 0;
 	tmp = mini->env_list;
 	while (av[++i])
@@ -27,15 +26,14 @@ void	bi_unset(t_mini *mini, char **av)
 		tmp = mini->env_list;
 		while (tmp)
 		{
-			if (!ft_strncmp(av[i], tmp->content,
-				ft_strlen_eq(tmp->content)))
+			if (!ft_strncmp(av[i], tmp->content, ft_strlen_eq(tmp->content)))
 			{
-				j = ft_strlen(tmp->content);
-				if (av[j + 1])
+				j = ft_strlen_eq(tmp->content);
+				if (av[i][j + 1] == '=')
 				{
 					delete_var(&(mini->env_list), tmp->content);
-					ft_lstadd_back(&(mini->env_list, 
-									ft_lstnew(ft_strdup(av[i]))));
+					ft_lstadd_back(&(mini->env_list),
+						ft_lstnew(ft_strdup(av[i])));
 				}
 				else
 				{

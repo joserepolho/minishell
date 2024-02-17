@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:47 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/11 05:45:09 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/14 19:55:46 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,35 +16,27 @@ bool	parse_input(t_mini *mini)
 {
 	size_t		commands;
 	size_t		i;
-	t_command	*command;
+	size_t		j;
 	char		**raw_commands;
+	t_command	*command;
 
-	raw_commands = ft_split(mini->input.raw_line, PIPE);
-	if (raw_commands == NULL || raw_commands[0] == NULL)
-	{
-		mini->commands = parse_c
-#include "../../includes/push_swap.h"ommand(mini->input.raw_line);
-		return ((bool)mini->commands);
-	}
+	raw_commands = parse(mini);
 	commands = mini->input.pipe_c + 1;
-	printf("commands: %zu\n", commands);
 	i = 0;
-	while (i < commands)
+	j = 0;
+	while (commands--)
 	{
-		printf("raw_commands[%zu]: %s\n", i, raw_commands[i]);
-		command = parse_command(raw_commands[i]);
+		i = j;
+		while (raw_commands[j] && *raw_commands[j] != PIPE)
+			j++;
+		command = construct_command(raw_commands + i, j - i);
 		if (!command)
 			return (false); /* TODO: free raw_comamnds */
 		command_add_back(&mini->commands, command);
-		i++;
+		j++;
 	}
+	free_list(raw_commands);
 	return (true);
-}
-
-bool	should_split(char *line)
-{
-#include "../../includes/push_swap.h"
-	return (redir_size(line) > 0 || *line == '|');
 }
 
 size_t	parse_size(char *line)
@@ -53,156 +45,97 @@ size_t	parse_size(char *line)
 	char	*section;
 
 	section = NULL;
+	si = 0;
 	while (*line)
 	{
+		skip_spaces(&line);
 		section = get_next_section(&line);
-		printf("section: |%s|\n", section);
-		if (section == NULL)
-			break ;
+		if (!section)
+			return (0);
+		free(section);
 		si++;
-		line++;
 	}
-	printf("parse_size: %d\n", si + 1);
 	return (si);
 }
 
 char	*get_next_section(char **line)
 {
 	char	*start;
-	char	*section;
 	bool	quotes;
 	int		i;
 
 	quotes = false;
 	start = *line;
-	while (*line)
+	while (**line)
 	{
-		if (**line == QUOTE || **line == DQUOTE)
-			quotes = !quotes;
 		if (!quotes && should_split(*line))
 			break ;
-		//(*line)++;
+		if (**line == QUOTE || **line == DQUOTE)
+			quotes = !quotes;
+		(*line)++;
 	}
-	if (redir_size(*line) > 0 || **line == '|')
-		i = redir_size(*line) || 1;
-	section = ft_substr(start, 0, i);
-	(*line) += i;
-	return (section);
+	if (*line - start == 0 && should_split(*line))
+	{
+		i = redir_size(*line);
+		if (i == 0)
+			i = 1;
+		(*line) += i;
+	}
+	else
+		i = *line - start;
+	return (ft_substr(start, 0, i));
 }
 
-char	**parse(char *line)
+char	**parse(t_mini *mini)
 {
-	int		i;
-	int		si;
-	int		index;
+	size_t	sections;
+	size_t	i;
+	char	*line;
+	char	*tmp;
 	char	**s;
-	bool	quotes;
 
+	line = mini->input.raw_line;
+	sections = parse_size(line);
 	i = 0;
-	si = 0;
-	index = 0;
-	quotes = false;
-	if (ft_strlen(line) == 0)
-		return (NULL);
-	s = malloc((parse_size(line) + 1) * sizeof(char *));
-	while (line[i])
+	s = malloc((sections + 1) * sizeof(char *));
+	s[sections] = NULL;
+	while (i < sections)
 	{
-		if (line[i] == QUOTE || line[i] == DQUOTE)
-			quotes = !quotes;
-		else if (!quotes && should_split(line + i))
-		{
-			s[si] = ft_substr(line, index, i - index);
-			printf("s[%d]: |%s|%ld\n", si, s[si], (line + i) - (line + index));
-			si++;
-			if (redir_size(line + i) > 0 || line[i] == '|')
-			{
-				s[si] = ft_substr(line, i, redir_size(line + i) || 1);
-				printf("s[%d]: |%s|%ld|%d|%s\n", si, s[si], (line + i) - (line
-						+ index), redir_size(line + i) || 1, line + i);
-				i += redir_size(line + i);
-				si++;
-			}
-			index = i;
-		}
+		skip_spaces(&line);
+		tmp = get_next_section(&line);
+		if (!tmp)
+			return (NULL);
+		s[i] = ft_strtrim(tmp, " ");
+		free(tmp);
+		if (s[i] == NULL)
+			return (free_list(s), NULL);
+		tmp = NULL;
 		i++;
 	}
-	s[si] = ft_substr(line, index, i - index);
-	printf("s[%d]: |%s|%ld\n", si, s[si], (line + i) - (line + index));
 	return (s);
 }
 
-char	**split_console_command(char *raw_command)
+t_command	*construct_command(char **raw_commands, size_t end)
 {
-	char	**args;
-	size_t	i;
-	size_t	args_len;
-
-	i = 0;
-	args_len = count_args(raw_command);
-	args = malloc(sizeof(char *) * (args_len + 1));
-	printf("args_len: %zu\n", args_len);
-	printf("raw_command: |%s|\n", raw_command);
-	while (i < args_len)
-	{
-		skip_spaces(&raw_command);
-		args[i] = get_next_arg(&raw_command);
-		printf("args[%zu]: |%s|\n", i, args[i]);
-		i++;
-	}
-	args[i] = NULL;
-	return (args);
-}
-
-t_command	*parse_command(char *raw_command)
-{
-	t_command	*command;
-	char		**args;
+	t_command			*command;
+	size_t				i;
+	enum e_redir_type	type;
 
 	command = malloc(sizeof(t_command));
 	if (!command)
 		return (NULL);
-	command->raw_command = raw_command;
-	args = split_console_command(raw_command);
-	command->cmd_name = args[0];
-	command->args = args;
-	command->redirs.redir_c = 0;
+	i = 0;
+	command->cmd_name = ft_strdup(raw_commands[i++]);
+	assign_args(command, raw_commands, &i, end);
+	t_redir_init(&command->in);
+	t_redir_init(&command->out);
+	while (i < end)
+	{
+		type = redir_type(raw_commands[i]);
+		if (type != RED_NULL)
+			assign_redir(command, raw_commands[++i], type);
+		i++;
+	}
 	command->next = NULL;
 	return (command);
-}
-
-void	command_add_back(t_command **command, t_command *new_command)
-{
-	t_command	*last_command;
-
-	if (!*command)
-	{
-		*command = new_command;
-		return ;
-	}
-	last_command = *command;
-	while (last_command->next)
-		last_command = last_command->next;
-	last_command->next = new_command;
-}
-
-void	command_add_redir(t_command *command, char *redir)
-{
-	// t_redir *new_redir;
-	(void)command;
-	(void)redir;
-	/*new_redir = malloc(sizeof(t_redir));
-	if (!new_redir)
-		return ;
-
-	new_redir->file = redir + 1;
-	if (*redir == REDIR_IN)
-		new_redir->type = REDIR_IN;
-	else if (*redir == REDIR_APPEND_IN)
-		new_redir->type = REDIR_APPEND_IN;
-	else if (*redir == REDIR_OUT)
-		new_redir->type = REDIR_OUT;
-	else if (*redir == REDIR_APPEND_OUT)
-		new_redir->type = REDIR_APPEND_OUT;*/
-	/*new_redir->next = command->redirs;
-	command->redirs = new_redir;*/
 }
