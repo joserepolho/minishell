@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   mini.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 14:44:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/17 14:49:00 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/23 06:00:26 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,10 @@
 
 void	init_mini(t_mini *mini)
 {
-	mini->command_ret = true;
+	mini->command_ret = 0;
 	reset_mini(mini);
+	mini->output = NULL;
+	mini->hd_limiter = NULL;
 }
 
 t_mini	*mini(void)
@@ -27,8 +29,21 @@ t_mini	*mini(void)
 
 void	reset_mini(t_mini *mini)
 {
+	#ifdef DEBUG
+		printf("resetting mini\n");
+	#endif
 	if (mini->input.raw_line)
+	{
 		free(mini->input.raw_line);
+		mini->input.raw_line = NULL;
+	}
+	if (mini->input.cmd_input != STDIN_FILENO)
+	{
+		close(mini->input.cmd_input);
+		mini->input.cmd_input = STDIN_FILENO;
+	}
+	if (mini->output)
+		free(mini->output);
 	mini->input.raw_line = NULL;
 	mini->input.len = 0;
 	mini->input.pipe_c = 0;

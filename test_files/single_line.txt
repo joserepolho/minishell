@@ -1,2 +1,3 @@
-cat aaa >> bbb < ttt
-echo -n
+echo "asd"'asd'	
+echo "asd"asd
+exit

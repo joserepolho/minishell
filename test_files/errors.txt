@@ -1,0 +1,22 @@
+echo Hello World >
+| ls
+ls |
+ls ||| grep 'txt'
+> ls
+ls <
+ls >
+echo "text" > /
+ls > grep 'txt'
+echo "hello" | > outfile.txt
+> outfile.txt echo "hello"
+< infile.txt cat
+ls $HOME/doesnotexist
+echo Path is: $PATHH
+echo "This is a test" > " invalid filename.txt"
+cat "unmatched quote here > outfile.txt
+nonexistent_command | grep 'output'
+echo $(nonexistent_command)
+$(echo "Unterminated command substitution
+echo Hello World >>
+echo $UNDEFINED_VAR
+exit

@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:37 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/17 21:56:42 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/23 05:05:01 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,12 @@
 
 int	main(int ac, char **av, char **env)
 {
-	t_command	*cmd;
-
-	// char	**s;
 	(void)av;
 	(void)ac;
-	(void)env;
-	/* TODO: Load env? */
-	cmd = NULL;
 	init_mini(mini());
 	mini()->env_list = set_env(env);
 	if (!(mini()->env_list))
-		free_shell(mini(), "Error\nMalloc failed!\n", "1");
+		free_shell(MALLOC_ERROR, STDERR_FILENO, NULL, NULL);
 	while (1)
 	{
 		mini()->input.raw_line = get_input(true);
@@ -37,18 +31,18 @@ int	main(int ac, char **av, char **env)
 		else
 		{
 			parse_input(mini());
-			cmd = mini()->commands;
-			while (cmd->next != NULL)
+			if (mini()->commands != NULL
+				&& ft_strncmp(mini()->commands->cmd_name, "exit", 4) == 0)
 			{
-				print_command(cmd->next);
-				cmd = cmd->next;
-				if (cmd->next != NULL)
-					printf("will pipe to: \n");
+				if (mini()->commands->args && mini()->commands->args[0]
+					&& mini()->commands->args[1] && mini()->commands->args[2])
+					error_msg(TOO_MANY_ARGS, "exit");
+				else
+					break ;
 			}
 			ft_execution(mini(), env);
-			free_mini(mini());
 		}
+		reset_mini(mini());
 	}
-	free_mini(mini());
-	return (0);
+	free_shell(NULL, 0, NULL, NULL);
 }

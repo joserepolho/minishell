@@ -1,0 +1,17 @@
+ls
+echo Hello World
+ls -l
+cat file.txt
+echo Hello > out.txt
+cat < in.txt
+echo World >> out.txt
+ls | wc -l
+cat file.txt | grep "pattern" | sort
+grep "pattern" < file.txt | sort > sorted.txt
+xyz123
+cat
+echo Hello World >
+| ls
+echo Hello World >>
+echo $HOME
+echo $(pwd)

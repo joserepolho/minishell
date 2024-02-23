@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 02:29:23 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/17 21:27:35 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/21 18:23:02 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,16 @@ char	*get_path(char *cmd, char **ev)
 	int		i;
 	char	**paths;
 	char	*path;
+	char	*tmp;
 
 	i = 0;
 	paths = ft_split(cmd_path(ev), ':');
 	while (paths[i])
 	{
 		path = ft_strjoin(paths[i], "/");
+		tmp = path;
 		path = ft_strjoin(path, cmd);
+		free(tmp);
 		if (!access(path, F_OK | X_OK))
 		{
 			free_list(paths);
@@ -47,20 +50,16 @@ void	execution(t_mini *mini, t_command *cmd, char **ev)
 {
 	char	*path;
 
-	if (!(mini->commands->next) && !ft_strncmp(mini->commands->cmd_name,
-			"exit", 4))
-	{
-		free_shell(mini, NULL, mini->commands->args[0]); // executar built-in direto se for so 1 comando exit
-		exit(0);
-	}
 	if (if_builtin(cmd->cmd_name))
 		built_in(mini, cmd);
 	else
 	{
 		path = get_path(cmd->cmd_name, ev);
-		if (execve(path, cmd->args, ev) < 0)
+		if (!path || execve(path, cmd->args, ev) < 0)
 		{
-			free_commands(cmd);
+			error_msg(CMD_NOT_FOUND, cmd->cmd_name);
+			if (!path)
+				free(path);
 			return ;
 		}
 		free(path);

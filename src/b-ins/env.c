@@ -20,3 +20,17 @@ void	bi_env(t_list *env_list)
 		env_list = env_list->next;
 	}
 }
+
+char	*get_env_var(t_list *env_list, char *var)
+{
+	int	i;
+
+	i = ft_strlen(var);
+	while (env_list)
+	{
+		if (ft_strncmp((char *)env_list->content, var, i) == 0)
+			return (ft_strchr((char *)env_list->content, '=') + 1);
+		env_list = env_list->next;
+	}
+	return ("");
+}

@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 16:09:31 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/14 19:26:16 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/22 18:26:44 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,10 @@ size_t	redir_size(char *line)
 	type = redir_type(line);
 	if (type == RED_AIN || type == RED_AOUT)
 		return (2);
-	if (type == RED_IN || type == RED_OUT)
+	if (type == RED_IN || type == RED_OUT || (line != NULL && (*line == '|'
+				|| *line == ' ')))
 		return (1);
 	return (0);
-}
-
-bool	should_split(char *line)
-{
-	return (redir_size(line) > 0 || *line == '|' || *line == ' ');
 }
 
 void	assign_redir(t_command *command, char *redir_file,
@@ -35,52 +31,62 @@ void	assign_redir(t_command *command, char *redir_file,
 	if (type == RED_IN || type == RED_AIN)
 	{
 		command->in.file = ft_strdup(redir_file);
+		if (!command->in.file)
+			free_shell(MALLOC_ERROR, STDERR_FILENO, free_commands_wrapper,
+				command);
 		command->in.type = type;
 	}
 	else
 	{
 		command->out.file = ft_strdup(redir_file);
+		if (!command->out.file)
+			free_shell(MALLOC_ERROR, STDERR_FILENO, free_commands_wrapper,
+				command);
 		command->out.type = type;
 	}
 }
 
-void	assign_args(t_command *command, char **raw_commands, size_t *i,
-		size_t end)
+void	assign_args(t_command *command, char **raw_commands, size_t end)
 {
-	size_t	j;
+	size_t	i;
 	size_t	k;
 	char	**args;
 
-	j = 0;
-	while (*i < end && redir_type(raw_commands[*i]) == RED_NULL)
-	{
-		(*i)++;
-		j++;
-	}
-	args = malloc((j + 1) * sizeof(char *));
+	i = 0;
+	while (i < end && redir_type(raw_commands[i]) == RED_NULL)
+		i++;
+	args = malloc((i + 1) * sizeof(char *));
 	if (!args)
-		return ; /* TODO: malloc error */
-	args[j] = NULL;
+		free_shell(MALLOC_ERROR, STDERR_FILENO, free_commands_wrapper, command);
+	args[i] = NULL;
 	k = 0;
-	while (k < j)
+	while (k < i)
 	{
-		args[k] = ft_strdup(raw_commands[*i - j + k]);
+		/* TODO: parse raw_command[k] before duping */
+		args[k] = ft_strdup(raw_commands[k]);
+		if (args[k] == NULL)
+			free_shell(MALLOC_ERROR, STDERR_FILENO, free_commands_wrapper,
+				command);
 		k++;
 	}
 	command->args = args;
 }
 
-void	command_add_back(t_command **command, t_command *new_command)
+void	command_add_back(t_command *new_command)
 {
+	t_mini		*mi;
 	t_command	*last_command;
 
-	if (!*command)
+	mi = mini();
+	if (mi->commands == NULL)
 	{
-		*command = new_command;
+		mi->commands = new_command;
 		return ;
 	}
-	last_command = *command;
-	while (last_command && last_command->next)
+	last_command = mi->commands;
+	while (last_command->next != NULL)
+	{
 		last_command = last_command->next;
+	}
 	last_command->next = new_command;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 03:56:01 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/16 20:02:04 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/22 21:17:52 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	built_in(t_mini *mini, t_command *cmd)
 	else if (!ft_strncmp(cmd->cmd_name, "export", 6))
 		bi_export(mini, cmd->args);
 	else if (!ft_strncmp(cmd->cmd_name, "pwd", 3))
-		bi_pwd(mini);
+		bi_pwd();
 	else if (!ft_strncmp(cmd->cmd_name, "unset", 5))
 		bi_unset(mini, cmd->args);
 }

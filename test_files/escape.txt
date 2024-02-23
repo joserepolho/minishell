@@ -1,5 +1,4 @@
-echo 'This is a single quoted string with a \' character'
-echo "The current directory is: \$PWD"
-echo "This is a line with a \* character."
+echo 'This is a single quoted string with a \" character'
+echo "The current directory is: \$PWD" | cat -e
 echo $PWD $OLDPWD
 echo "The current directory is: $PWD"

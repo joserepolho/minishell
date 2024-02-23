@@ -54,17 +54,17 @@ void	delete_var(t_list **head, void *node_to_del)
 void	bi_export(t_mini *mini, char **av)
 {
 	int		i;
+	int		j;
 	t_list	*tmp;
-	t_list	*dtmp;
 	t_list	*exp;
 
-	i = -1;
+	i = 0;
 	tmp = mini->env_list;
-	if (!av[0])
+	if (!av[1])
 	{
 		while (tmp)
 		{
-			printf("declare -x %p\n", tmp->content);
+			printf("declare -x %s\n", (char *)tmp->content);
 			tmp = tmp->next;
 		}
 		return ;
@@ -72,15 +72,31 @@ void	bi_export(t_mini *mini, char **av)
 	tmp = mini->env_list;
 	while (av[++i])
 	{
+		if (!ft_isalpha(av[i][0]) && av[i][0] != '_')
+		{
+			error_msg(TOO_MANY_ARGS, av[i]);
+			return ;
+		}
+		j = 0;
+		while (av[i][++j] != '\n' && av[i][j] != '=')
+		{
+			printf("%i\n", j);
+			if (!ft_isalnum(av[i][j]) && av[i][j] != '_')
+			{
+				error_msg(NOT_VALID_IDENT, av[i]);
+				return ;
+			}
+		}
 		while (tmp)
 		{
 			if (!ft_strncmp(av[i], tmp->content, ft_strlen_eq(tmp->content)))
 			{
-				dtmp = tmp->content;
-				delete_var(&(mini->env_list), dtmp->content);
+				delete_var(&(mini->env_list), tmp->content);
+				break ;
 			}
 			tmp = tmp->next;
 		}
+		tmp = mini->env_list;
 		exp = ft_lstnew(ft_strdup((char *)av[i]));
 		ft_lstadd_back(&(mini->env_list), exp);
 	}
