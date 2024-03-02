@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:27:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/03/02 03:18:08 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/02 05:51:17 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,7 @@ void					execute_in_child(t_command *cmd, char **ev,
 void					execute_in_parent(t_mini *mini, t_command *cmd,
 							int has_next);
 void					setup_redirections(t_command *cmd, bool isparent);
-void					wait_for_children(t_mini *mini);
+void					wait_for_children(t_mini *mini, int i);
 // \ execute.c
 bool					execution(t_command *cmd, char **ev);
 // \ heredoc.c
