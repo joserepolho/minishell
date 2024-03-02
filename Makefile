@@ -14,10 +14,12 @@ SRC_FOLDER = src/
 OBJ_DIR = obj/
 
 SRC_ROOT_FILES = main.c input.c mini.c utils.c free.c signal_handle.c \
-				errors.c colors.c
-B-INS_FILES = cd.c echo.c env.c export.c pwd.c unset.c utils.c
+				errors.c path.c path_utils.c
+B-INS_FILES = cd.c echo.c env.c export.c pwd.c unset.c utils.c exit.c
 EX_FILES = execute.c execution.c heredoc.c
-PARSER_LEXER_FILES = lexer.c parser.c parser_helpers.c parser_helpers2.c
+
+PARSER_LEXER_FILES = lexer.c parser.c parser_helpers.c str_expander.c \
+			str_expander_utils.c
 
 FILES = \
 	$(SRC_ROOT_FILES) \

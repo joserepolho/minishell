@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 03:56:01 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/22 21:17:52 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/28 20:20:42 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	if_builtin(char *s)
 	if (!ft_strncmp(s, "cd", 2) || !ft_strncmp(s, "echo", 4)
 		|| !ft_strncmp(s, "env", 3) || !ft_strncmp(s, "exit", 4)
 		|| !ft_strncmp(s, "export", 6) || !ft_strncmp(s, "pwd", 3)
-		|| !ft_strncmp(s, "unset", 5))
+		|| !ft_strncmp(s, "unset", 5) || !ft_strncmp(s, "exit", 4))
 		return (1);
 	return (0);
 }
@@ -36,4 +36,6 @@ void	built_in(t_mini *mini, t_command *cmd)
 		bi_pwd();
 	else if (!ft_strncmp(cmd->cmd_name, "unset", 5))
 		bi_unset(mini, cmd->args);
+	else if (!ft_strncmp(cmd->cmd_name, "exit", 4))
+		bi_exit(mini, cmd->args, cmd->next != NULL);
 }

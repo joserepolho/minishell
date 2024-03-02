@@ -2,9 +2,12 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   echo.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
+/*                                                    +:+ +:+
+	+:+     */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+
+	+#+        */
+/*                                                +#+#+#+#+#+
+	+#+           */
 /*   Created: 2024/02/14 01:21:08 by joaoribe          #+#    #+#             */
 /*   Updated: 2024/02/14 01:21:08 by joaoribe         ###   ########.fr       */
 /*                                                                            */
@@ -12,30 +15,30 @@
 
 #include "minishell.h"
 
+
 void	bi_echo(char **av)
 {
-	int	i;
-	int	flag;
+	bool	flag_n;
+	int		i;
 
 	i = 1;
-	flag = 0;
-	if (!av[1])
+	flag_n = false;
+	if (av[i])
 	{
-		printf("\n");
-		return ;
+		while (av[i] && !ft_strncmp(av[i], ECHO_FLAG_N, 2))
+		{
+			flag_n = true;
+			i++;
+		}
+		while (av[i])
+		{
+			ft_putstr_fd(av[i], STDOUT_FILENO);
+			if (av[i + 1])
+				ft_putstr_fd(" ", STDOUT_FILENO);
+			i++;
+		}
 	}
-	if (!ft_strncmp(av[1], "-n", 2))
-	{
-		flag = 1;
-		i++;
-	}
-	while (av[i])
-	{
-		printf("%s", av[i]);
-		i++;
-		if (av[i] && av[i][0])
-			printf(" ");
-	}
-	if (!flag)
-		printf("\n");
+	if (!flag_n)
+		ft_putstr_fd("\n", STDOUT_FILENO);
+	mini()->command_ret = 0;
 }

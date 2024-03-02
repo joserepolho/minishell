@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   free.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/14 18:22:28 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/23 05:59:55 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/02/29 19:08:24 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,26 @@ void	free_commands(t_command *commands)
 		tmp = commands->next;
 		if (commands->cmd_name)
 			free(commands->cmd_name);
-		if (commands->in.file)
-			free(commands->in.file);
-		if (commands->out.file)
-			free(commands->out.file);
+		if (commands->redirs)
+			free_redirs(commands->redirs);
 		if (commands->args)
 			free_list(commands->args);
 		free(commands);
 		commands = tmp;
+	}
+}
+
+void	free_redirs(t_redir *redirs)
+{
+	t_redir	*tmp;
+
+	while (redirs != NULL)
+	{
+		tmp = redirs->next;
+		if (redirs->file)
+			free(redirs->file);
+		free(redirs);
+		redirs = tmp;
 	}
 }
 
@@ -41,10 +53,12 @@ void	free_list(char **list)
 		return ;
 	while (list[i] != NULL)
 	{
-		free(list[i]);
+		if (list && list[i] && list[i][0])
+			free(list[i]);
 		i++;
 	}
-	free(list);
+	if (list)
+		free(list);
 }
 
 // mudei a funcao para podermos dar free de alguma variavel que tenhamos alocado
@@ -54,9 +68,6 @@ void	free_shell(char *err, int status, void (*cleanup_func)(void *),
 	t_mini	*m;
 
 	m = mini();
-	#ifdef DEBUG
-		printf("freeing shell\n");
-	#endif
 	if (free_arg != NULL && cleanup_func != NULL)
 		cleanup_func(free_arg);
 	reset_mini(m);
@@ -66,12 +77,12 @@ void	free_shell(char *err, int status, void (*cleanup_func)(void *),
 		close(m->input.pip[1]);
 	}
 	if (m->env_list)
-		ft_lstclear(&(m->env_list), free_content);
+		ft_lstclear(&(m->env_list), free);
 	rl_clear_history();
 	if (err)
-		write(2, err, ft_strlen(err));
-	close(0);
-	close(1);
+		write(STDERR_FILENO, err, ft_strlen(err));
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
 	exit(status);
 }
 

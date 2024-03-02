@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 17:13:51 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/21 18:35:15 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/27 19:28:06 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 enum e_redir_type	redir_type(char *line)
 {
-	if (line == NULL || ft_strlen(line) > 2)
+	if (line == NULL)
 		return (RED_NULL);
 	if (strncmp(line, REDIR_APPEND_IN, 2) == 0)
 		return (RED_AIN);
@@ -27,32 +27,82 @@ enum e_redir_type	redir_type(char *line)
 	return (RED_NULL);
 }
 
-void	t_redir_init(t_command *command)
+bool	valid_env_char(char c)
 {
-	command->in.file = NULL;
-	command->in.fd = -1;
-	command->in.type = RED_NULL;
-	command->out.file = NULL;
-	command->out.fd = -1;
-	command->out.type = RED_NULL;
+	return (ft_isalnum(c) || c == '_');
+}
+
+bool	quoted_str(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str && str[i])
+	{
+		if (*str == '\'' || *str == '\"')
+			return (true);
+		i++;
+	}
+	return (false);
+}
+
+bool	valid_cmd_arg(char *str)
+{
+	bool	quoted;
+	int		l;
+
+	quoted = quoted_str(str);
+	l = str_expander_len(str);
+	if (!quoted && l == 0)
+		return (false);
+	return (l > 0 || quoted);
+}
+
+void	free_assign_null(void **ptr)
+{
+	if (*ptr)
+		free(*ptr);
+	*ptr = NULL;
 }
 
 void	print_command(t_command *command)
 {
-	size_t	i;
+	size_t		i;
+	t_redir		*redir;
+	t_command	*tmp;
 
 	i = 0;
-	printf("print_command: ");
-	while (command->args[i])
+	if (ft_strlen(command->cmd_name) != 0)
+		DEBUG_MSG("print_command: ");
+	while (command->args && command->args[i])
 	{
 		printf("|%s| ", command->args[i]);
 		i++;
 	}
-	printf("\n");
-	if (command->in.file)
-		printf("redir in type:|%d|file:|%s|\n", command->in.type,
-			command->in.file);
-	if (command->out.file)
-		printf("redir out type:|%d|file:|%s|\n", command->out.type,
-			command->out.file);
+	if (ft_strlen(command->cmd_name) != 0)
+		printf("\n");
+	tmp = command;
+	while (tmp)
+	{
+		redir = command->redirs;
+		while (redir)
+		{
+			DEBUG_MSG("redir:|%s| type:", redir->file);
+			if (redir->type)
+			{
+				if (redir->type == RED_IN)
+					printf("RED_IN\n");
+				else if (redir->type == RED_AIN)
+					printf("RED_AIN\n");
+				else if (redir->type == RED_OUT)
+					printf("RED_OUT\n");
+				else if (redir->type == RED_AOUT)
+					printf("RED_AOUT\n");
+			}
+			redir = redir->next;
+		}
+		tmp = tmp->next;
+		if (tmp)
+			DEBUG_MSG("output will be piped to:\n");
+	}
 }

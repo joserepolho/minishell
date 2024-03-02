@@ -7,6 +7,7 @@ cat < in.txt
 echo World >> out.txt
 ls | wc -l
 cat file.txt | grep "pattern" | sort
+echo "hello" | > outfile.txt
 grep "pattern" < file.txt | sort > sorted.txt
 xyz123
 cat

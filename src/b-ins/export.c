@@ -2,9 +2,12 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
+/*                                                    +:+ +:+
+	+:+     */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+
+	+#+        */
+/*                                                +#+#+#+#+#+
+	+#+           */
 /*   Created: 2024/02/14 05:10:41 by joaoribe          #+#    #+#             */
 /*   Updated: 2024/02/14 05:10:41 by joaoribe         ###   ########.fr       */
 /*                                                                            */
@@ -22,11 +25,6 @@ int	ft_strlen_eq(char *s)
 	return (i);
 }
 
-void	free_content(void *content)
-{
-	free(content);
-}
-
 void	delete_var(t_list **head, void *node_to_del)
 {
 	t_list	*current;
@@ -42,7 +40,7 @@ void	delete_var(t_list **head, void *node_to_del)
 				previous->next = current->next;
 			else
 				*head = current->next;
-			ft_lstdelone(current, free_content);
+			ft_lstdelone(current, free);
 			return ;
 		}
 		previous = current;
@@ -50,54 +48,54 @@ void	delete_var(t_list **head, void *node_to_del)
 	}
 }
 
-// ver como deve ser arg do export
+void	show_export(t_list *env_list, char **av)
+{
+	t_list	*tmp;
+
+	if (av[1])
+		return ;
+	tmp = env_list;
+	while (tmp)
+	{
+		printf("declare -x %s\n", (char *)tmp->content);
+		tmp = tmp->next;
+	}
+}
+
+void	delete_if_needed(t_list **env_list, char *var, int len)
+{
+	t_list	*tmp;
+
+	tmp = *env_list;
+	while (tmp)
+	{
+		if (!ft_strncmp(var, tmp->content, len))
+		{
+			delete_var(env_list, tmp->content);
+			return ;
+		}
+		tmp = tmp->next;
+	}
+}
+
 void	bi_export(t_mini *mini, char **av)
 {
 	int		i;
-	int		j;
-	t_list	*tmp;
+	int		res;
 	t_list	*exp;
 
+	show_export(mini->env_list, av);
 	i = 0;
-	tmp = mini->env_list;
-	if (!av[1])
-	{
-		while (tmp)
-		{
-			printf("declare -x %s\n", (char *)tmp->content);
-			tmp = tmp->next;
-		}
-		return ;
-	}
-	tmp = mini->env_list;
 	while (av[++i])
 	{
-		if (!ft_isalpha(av[i][0]) && av[i][0] != '_')
-		{
-			error_msg(TOO_MANY_ARGS, av[i]);
+		res = valid_env_var_name(av[i], true);
+		if (res == 0)
+			continue ;
+		else if (res == -1)
 			return ;
-		}
-		j = 0;
-		while (av[i][++j] != '\n' && av[i][j] != '=')
-		{
-			printf("%i\n", j);
-			if (!ft_isalnum(av[i][j]) && av[i][j] != '_')
-			{
-				error_msg(NOT_VALID_IDENT, av[i]);
-				return ;
-			}
-		}
-		while (tmp)
-		{
-			if (!ft_strncmp(av[i], tmp->content, ft_strlen_eq(tmp->content)))
-			{
-				delete_var(&(mini->env_list), tmp->content);
-				break ;
-			}
-			tmp = tmp->next;
-		}
-		tmp = mini->env_list;
+		delete_if_needed(&mini->env_list, av[i], res);
 		exp = ft_lstnew(ft_strdup((char *)av[i]));
-		ft_lstadd_back(&(mini->env_list), exp);
+		ft_lstadd_back(&mini->env_list, exp);
 	}
+	mini->command_ret = 0;
 }

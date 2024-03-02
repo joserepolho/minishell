@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:45 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/22 17:26:46 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/28 16:47:00 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,28 +18,26 @@ bool	input_error_check(t_mini *mini)
 	char	*line_cursor;
 	bool	quotes;
 	bool	dquotes;
-	bool	escaped;
 
 	line_cursor = mini->input.raw_line;
 	quotes = false;
 	dquotes = false;
-	escaped = false;
 	while (*line_cursor)
 	{
 		if (!skip_spaces(&line_cursor))
 			return (false);
-		if (*line_cursor == ESCAPE_CHAR || escaped)
-			escaped = !escaped;
-		else if (*line_cursor == QUOTE)
+		if (*line_cursor == QUOTE && !dquotes)
 			quotes = !quotes;
-		else if (*line_cursor == DQUOTE)
+		else if (*line_cursor == DQUOTE && !quotes)
 			dquotes = !dquotes;
 		else if (*line_cursor == PIPE)
 			mini->input.pipe_c++;
 		line_cursor++;
 	}
 	mini->input.len = line_cursor - mini->input.raw_line;
-	return (!(quotes || dquotes) && ft_strlen(mini->input.raw_line) > 0);
+	if (quotes || dquotes)
+		return (error_msg_ret(OPEN_QUOTES_ERROR, NULL, EXIT_FAILURE), false);
+	return (true);
 }
 
 bool	skip_spaces(char **line)
@@ -52,80 +50,50 @@ bool	skip_spaces(char **line)
 // check for all types of semantic errors
 bool	semantic_checker(char **sections)
 {
-	bool	last_was_redir;
 	bool	isvalid;
 	int		i;
 	char	*error;
+	char	*last_section;
 
-	last_was_redir = false;
+	last_section = NULL;
 	isvalid = true;
 	i = 0;
 	error = NULL;
-	while (sections && sections[i])
+	while (sections && sections[i] && isvalid && !error)
 	{
-		isvalid = valid_arg(sections, i, &last_was_redir, &error);
-		if (!isvalid || error != NULL)
-			break ;
+		isvalid = valid_section(sections, &i, &last_section, &error);
 		i++;
 	}
-	/*printf("section:|%s|isnull:%d|%d|%d\n", sections[i], sections[i] == NULL,
-		isvalid, last_was_redir);*/
-	if (sections[i] != NULL)
-	{
-		valid_arg(sections, i, &last_was_redir, &error);
-		if (error != NULL)
-		{
-			if (*error == '\n')
-				error = "newline'";
-			// printf("semantic_checker output: %d\n", 0);
-			return (error_msg(SYNTAX_ERROR, error), false);
-		}
-	}
-	if (error != NULL)
-	{
-		// printf("semantic_checker output: %d\n", 0);
-		return (error_msg(SYNTAX_ERROR, error), false);
-	}
-	if (isvalid && last_was_redir)
-	{
-		// printf("semantic_checker output: %d\n", isvalid && last_was_redir);
-		return (error_msg(SYNTAX_ERROR, "newline'"), false);
-	}
-	return (isvalid && !last_was_redir);
+	if (error)
+		return (error_msg_ret(SYNTAX_ERROR, error, EXIT_FAILURE), false);
+	return (isvalid);
 }
 
-bool	valid_arg(char **sections, int i, bool *last_was_redir, char **error)
+bool	valid_section(char **sections, int *i,
+	char **last_section, char **error)
 {
-	char	*tmp;
-
-	if (redir_type(sections[i]) != RED_NULL || *sections[i] == PIPE)
+	if (*sections[*i] == PIPE)
 	{
-		if (*last_was_redir || i == 0)
-			return (*error = sections[i], false);
-		*last_was_redir = true;
+		if (!*last_section)
+			return (*error = sections[*i], false);
+		else if (!sections[*i + 1])
+			return (*error = "newline'", false);
 	}
-	else if (*last_was_redir)
+	if (redir_type(*last_section) != RED_NULL)
 	{
-		*last_was_redir = false;
-		tmp = ft_strtrim(sections[i], " \n\t");
-		/*printf("tmp:|%s|isnull:%d|%d|%d\n", tmp, tmp == NULL, *tmp == '\0',
-			ft_strlen(tmp) == 0);*/
-		if (!tmp || !*tmp || ft_strlen(tmp) == 0)
-			return (free(tmp), *error = sections[i], false);
-		free(tmp);
+		if (redir_type(sections[*i]) != RED_NULL || *sections[*i] == PIPE)
+			return (*error = sections[*i], false);
+		(*i)++;
 	}
-	return (true);
-}
-
-bool	valid_command_or_arg(char *section)
-{
-	char	*tmp;
-
-	/*int		i;
-	bool	valid;*/
-	tmp = ft_strtrim(section, " \n\t");
-	if (!tmp || !*tmp || ft_strlen(tmp) == 0)
-		return (free(tmp), false);
-	free(tmp);
+	else if (redir_type(sections[*i]) != RED_NULL)
+	{
+		if (!sections[*i + 1])
+			return (*error = "newline'", false);
+		else if (redir_type(sections[*i + 1]) != RED_NULL
+			|| *sections[*i + 1] == PIPE)
+			return (*error = sections[*i + 1], false);
+		(*i)++;
+	}
+	*last_section = sections[*i];
 	return (true);
 }

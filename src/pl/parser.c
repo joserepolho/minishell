@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:47 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/22 20:16:37 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/02/27 22:17:51 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@ bool	parse_input(t_mini *mini)
 	t_command	*command;
 
 	raw_commands = parse(mini);
-	if (!raw_commands)
-		free_shell(MALLOC_ERROR, EXIT_FAILURE, free, raw_commands);
 	if (!semantic_checker(raw_commands))
 		return (free_list(raw_commands), false);
 	commands = ((int)mini->input.pipe_c) + 1;
@@ -33,15 +31,14 @@ bool	parse_input(t_mini *mini)
 		i = j;
 		while (raw_commands[j] && *raw_commands[j] != PIPE)
 			j++;
-		command = construct_command(mini, raw_commands + i, j - i);
+		command = construct_command(raw_commands + i, j - i);
 		if (!command)
-			free_shell(MALLOC_ERROR, STDERR_FILENO, NULL, NULL);
+			return (free_list(raw_commands), false);
 		command_add_back(command);
 		commands--;
 		j++;
 	}
-	free_list(raw_commands);
-	return (true);
+	return (free_list(raw_commands), true);
 }
 
 size_t	parse_size(char *line)
@@ -65,30 +62,26 @@ size_t	parse_size(char *line)
 
 char	*get_next_section(char **line)
 {
-	char	*start;
 	bool	quotes;
+	bool	dquotes;
 	int		i;
-	bool	escaped;
 
 	quotes = false;
-	start = *line;
-	escaped = false;
-	while (**line && (quotes || !redir_size(*line)) && skip_spaces(line))
+	dquotes = false;
+	i = 0;
+	if (redir_size(*line) > 0)
+		return (i = redir_size(*line), (*line) += i, ft_substr(*line - i, 0,
+				i));
+	while (**line && (quotes || dquotes || redir_size(*line) == 0))
 	{
-		if (**line == ESCAPE_CHAR || escaped)
-			escaped = !escaped;
-		else if (**line == QUOTE || **line == DQUOTE)
+		if (**line == QUOTE)
 			quotes = !quotes;
+		else if (**line == DQUOTE)
+			dquotes = !dquotes;
+		i++;
 		(*line)++;
 	}
-	i = *line - start;
-	if (i == 0 && redir_size(*line))
-	{
-		i = redir_size(*line);
-		(*line) += i;
-	}
-	return (substr_expander(start, i));
-	/*return (ft_substr(start, 0, i));*/
+	return (ft_substr(*line - i, 0, i));
 }
 
 char	**parse(t_mini *mini)
@@ -98,7 +91,6 @@ char	**parse(t_mini *mini)
 	char	*line;
 	char	**s;
 
-	// char	*tmp;
 	line = mini->input.raw_line;
 	sections = parse_size(line);
 	i = 0;
@@ -109,45 +101,48 @@ char	**parse(t_mini *mini)
 	while (i < sections)
 	{
 		skip_spaces(&line);
-		/*tmp = get_next_section(&line);
-		if (!tmp)
-			return (NULL);
-		s[i] = ft_strtrim(tmp, " ");
-		printf("section:|%s|\n", s[i]);
-		free(tmp);*/
 		s[i] = get_next_section(&line);
 		if (s[i] == NULL)
 			return (free_list(s), NULL);
-		// tmp = NULL;
 		i++;
 	}
 	return (s);
 }
 
-t_command	*construct_command(t_mini *mini, char **raw_commands, size_t end)
+t_command	*construct_command(char **raw_commands, size_t end)
 {
-	t_command			*command;
-	size_t				i;
-	enum e_redir_type	type;
+	t_command	*command;
+	size_t		i;
+	char		*lim;
 
 	command = malloc(sizeof(t_command));
 	if (!command)
 		free_shell(MALLOC_ERROR, STDERR_FILENO, NULL, NULL);
 	i = 0;
-	command->cmd_name = ft_strdup(raw_commands[i]);
-	if (!command->cmd_name)
-		free_shell(MALLOC_ERROR, STDERR_FILENO, free, command);
-	assign_args(command, raw_commands, end);
-	t_redir_init(command);
+	command->redirs = NULL;
+	command->args = NULL;
 	while (i < end)
 	{
-		type = redir_type(raw_commands[i]);
-		if (type != RED_NULL)
-			assign_redir(command, raw_commands[++i], type);
-		if (type == RED_AIN)
-			mini->hd_limiter = ft_strdup(raw_commands[i]);
+		if (!update_command(command, raw_commands, &i, end))
+			return (free(command), NULL);
+		if ((int)i - 1 >= 0 && redir_size(raw_commands[i - 1]) == RED_AIN)
+		{
+			lim = ft_strdup(raw_commands[i]);
+			if (raw_commands[i][0] == QUOTE || raw_commands[i][0] == DQUOTE)
+			{
+				mini()->lim_q = 1;
+				lim[ft_strlen(lim) - 1] = '\0';
+				lim++;
+			}
+			mini()->hd_limiter = ft_strdup(lim);
+			free(lim);
+		}
 		i++;
 	}
+	if (command->args == NULL)
+		command->cmd_name = "";
+	else
+		command->cmd_name = command->args[0];
 	command->next = NULL;
 	return (command);
 }

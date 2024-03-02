@@ -1,2 +1,4 @@
-alksmdokinuiwndajknkmn123 | asd | asd
+< test_files/single_line.txt < test_files/errors.txt > cat
+< test_files/simple.txt > asd > ads | cat
+ls > grep 'txt'
 exit
