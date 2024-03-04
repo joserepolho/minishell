@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:27:57 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/03/02 05:51:17 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/04 01:22:52 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <signal.h>
 # include <stdbool.h>
 # include <stdio.h>
+# include <errno.h>
 # include <sys/wait.h>
 # include <termios.h>
 
@@ -119,6 +120,7 @@ typedef struct s_redir
 {
 	char				*file;
 	int					fd;
+	int					red_in_not_found;
 	enum e_redir_type	type;
 	struct s_redir		*next;
 }						t_redir;
@@ -142,6 +144,8 @@ typedef struct s_mini
 	int					lim_q;
 	char				*output;
 	int					hdfd;
+	int					exit_unavailability;
+	int					original_stdin_fd;
 }						t_mini;
 
 // main.c
@@ -220,15 +224,17 @@ void					free_commands_wrapper(void *arg);
 // signal_handle.c
 void					prmpt_ctrlc(int signal);
 void					sig_init(void);
+void					exec_sig(int signal);
+void					hd_ctrlc(int sign);
 // ex
 // \ execution.c
 void					ft_execution(t_mini *mini, char **ev);
 void					execute_in_child(t_command *cmd, char **ev,
 							int has_next);
 void					execute_in_parent(t_mini *mini, t_command *cmd,
-							int has_next);
+							int has_next, int j);
 void					setup_redirections(t_command *cmd, bool isparent);
-void					wait_for_children(t_mini *mini, int i);
+void					wait_for_children(t_mini *mini);
 // \ execute.c
 bool					execution(t_command *cmd, char **ev);
 // \ heredoc.c
@@ -236,9 +242,10 @@ char					*heredoc(t_mini *mini);
 // b-ins
 // \ utils.c
 int						if_builtin(char *s);
-void					built_in(t_mini *mini, t_command *cmd);
+int						if_builtin_epe(char *s);
+void					built_in(t_mini *mini, t_command *cmd, int j);
 // \ cd
-void					bi_cd(t_mini *mini, char **av);
+void					bi_cd(t_mini *mini, char **av, int p);
 // \ echo
 void					bi_echo(char **av);
 // \ env
@@ -249,11 +256,11 @@ int						valid_env_var_name(char *str, bool is_entry);
 int						ft_strlen_eq(char *s);
 void					delete_var(t_list **head, void *node_to_del);
 void					show_export(t_list *env_list, char **av);
-void					bi_export(t_mini *mini, char **av);
+void					bi_export(t_mini *mini, char **av, int j);
 // \ pwd
 void					bi_pwd(void);
 // \ unset
-void					bi_unset(t_mini *mini, char **av);
+void					bi_unset(t_mini *mini, char **av, int j);
 // \ exit
 int						calculate_exit_code_from_string(const char *number);
 bool					str_is_num(const char *str);

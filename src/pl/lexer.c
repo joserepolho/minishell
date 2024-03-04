@@ -6,13 +6,12 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:45 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/28 16:47:00 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/03/02 06:01:28 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* TODO: check for all types of semantic errors */
 bool	input_error_check(t_mini *mini)
 {
 	char	*line_cursor;
@@ -30,7 +29,7 @@ bool	input_error_check(t_mini *mini)
 			quotes = !quotes;
 		else if (*line_cursor == DQUOTE && !quotes)
 			dquotes = !dquotes;
-		else if (*line_cursor == PIPE)
+		else if (*line_cursor == PIPE && !quotes && !dquotes)
 			mini->input.pipe_c++;
 		line_cursor++;
 	}

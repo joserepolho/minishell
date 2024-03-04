@@ -28,7 +28,7 @@ int	ft_strncmp_unset(const char *s1, const char *s2, size_t n)
 	return (0);
 }
 
-void	bi_unset(t_mini *mini, char **av)
+void	bi_unset(t_mini *mini, char **av, int j)
 {
 	int		i;
 	size_t	len;
@@ -36,6 +36,8 @@ void	bi_unset(t_mini *mini, char **av)
 
 	i = 0;
 	tmp = mini->env_list;
+	if (j)
+		return ;
 	while (av[++i])
 	{
 		len = ft_strlen(av[i]);

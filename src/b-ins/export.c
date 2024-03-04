@@ -78,7 +78,7 @@ void	delete_if_needed(t_list **env_list, char *var, int len)
 	}
 }
 
-void	bi_export(t_mini *mini, char **av)
+void	bi_export(t_mini *mini, char **av, int j)
 {
 	int		i;
 	int		res;
@@ -89,6 +89,8 @@ void	bi_export(t_mini *mini, char **av)
 	while (av[++i])
 	{
 		res = valid_env_var_name(av[i], true);
+		if (j)
+			return ;
 		if (res == 0)
 			continue ;
 		else if (res == -1)

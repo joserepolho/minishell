@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 22:27:57 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/03/02 06:38:19 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/04 02:00:09 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ t_command	*ft_lstlast_mini(t_command *lst)
 void	ft_execution(t_mini *mini, char **ev)
 {
 	int			i;
+	int			j;
 	t_command	*cmd;
 	t_command	*lst;
 	int			has_next;
@@ -33,12 +34,17 @@ void	ft_execution(t_mini *mini, char **ev)
 	lst = ft_lstlast_mini(cmd);
 	while (cmd)
 	{
+		signal(SIGQUIT, exec_sig);
+		signal(SIGPIPE, exec_sig);
+		signal(SIGINT, exec_sig);
 		if (cmd->redirs && cmd->redirs->type == RED_AIN)
 		{
 			heredoc_fd = heredoc(mini);
 			mini->hdfd = open(heredoc_fd, O_RDONLY);
 			free(mini->hd_limiter);
 			free(heredoc_fd);
+			if (mini->command_ret == 130)
+				return ;
 		}
 		has_next = (cmd->next != NULL);
 		if (has_next)
@@ -51,44 +57,51 @@ void	ft_execution(t_mini *mini, char **ev)
 			cmd = cmd->next;
 			continue ;
 		}
-		if (has_next && if_builtin(lst->cmd_name) && !cmd->redirs)
-			cmd = cmd->next;
-		else
-		{
+		j = mini->input.pipe_c;
 		i = if_builtin(cmd->cmd_name);
-		if (i)
-			execute_in_parent(mini, cmd, has_next);
-		else if (!i)
-			execute_in_child(cmd, ev, has_next);
-		if (has_next)
+		if (j && (if_builtin_epe(cmd->cmd_name))
+			&& cmd == lst && !cmd->redirs)
 		{
-			close(mini->input.pip[1]);
-			mini->input.cmd_input = mini->input.pip[0];
+			close(mini->input.pip[0]);
+			built_in(mini, cmd, 0);
+			cmd = cmd->next;
 		}
-		cmd = cmd->next;
+		else if (j && i && cmd == lst && !cmd->redirs)
+			cmd = cmd->next;
+		else if (j || !j || cmd == lst || cmd != lst)
+		{
+			if (i)
+				execute_in_parent(mini, cmd, has_next, j);
+			else if (!i)
+				execute_in_child(cmd, ev, has_next);
+			if (has_next)
+			{
+				close(mini->input.pip[1]);
+				mini->input.cmd_input = mini->input.pip[0];
+			}
+			cmd = cmd->next;
 		}
 	}
-	wait_for_children(mini, i);
+	wait_for_children(mini);
 }
 
-void	wait_for_children(t_mini *mini, int i)
+void	wait_for_children(t_mini *mini)
 {
-	t_command	*cmd;
+	int			status;
 
-	cmd = mini->commands;
-	while (cmd)
+	while (1)
 	{
-		if (!i)
-		{
-			waitpid(0, &cmd->status, 0);
-			if (WIFEXITED(cmd->status))
-				mini->command_ret = WEXITSTATUS(cmd->status);
-		}
-		cmd = cmd->next;
+		waitpid(0, &status, 0);
+		if (errno == ECHILD)
+			break ;
+		if (WIFEXITED(status))
+			mini->command_ret = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			mini->command_ret = WTERMSIG(status);
 	}
 }
 
-void	execute_in_parent(t_mini *mini, t_command *cmd, int has_next)
+void	execute_in_parent(t_mini *mini, t_command *cmd, int has_next, int j)
 {
 	int	original_stdout;
 	int	original_stdin;
@@ -98,7 +111,7 @@ void	execute_in_parent(t_mini *mini, t_command *cmd, int has_next)
 	if (has_next)
 		dup2(mini->input.pip[1], STDOUT_FILENO);
 	setup_redirections(cmd, true);
-	built_in(mini, cmd);
+	built_in(mini, cmd, j);
 	dup2(original_stdin, STDIN_FILENO);
 	dup2(original_stdout, STDOUT_FILENO);
 	close(original_stdin);
@@ -135,7 +148,6 @@ void	execute_in_child(t_command *cmd, char **ev, int has_next)
 		free_shell(FORK_ERROR, EXIT_FAILURE, NULL, NULL);
 	else
 	{
-		//DEBUG_MSG("command_ret: %d\n", mini->command_ret);
 		if (has_next)
 			close(mini()->input.pip[1]);
 		if (mini()->input.cmd_input != STDIN_FILENO)
@@ -143,17 +155,9 @@ void	execute_in_child(t_command *cmd, char **ev, int has_next)
 		if (!has_next)
 			waitpid(pid, &mini()->command_ret, 0);
 		if (WIFEXITED(mini()->command_ret))
-		{
-			//DEBUG_MSG("Child terminated normally|%d|%d\n", mini->command_ret,
-				WEXITSTATUS(mini()->command_ret);
 			mini()->command_ret = WEXITSTATUS(mini()->command_ret);
-		}
 		else if (WIFSIGNALED(mini()->command_ret))
-		{
-			printf("Child terminated by signal %d\n",
-				WTERMSIG(mini()->command_ret));
-			/* need to handle signals */
-		}
+			mini()->command_ret = WTERMSIG(mini()->command_ret);
 	}
 }
 

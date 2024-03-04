@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/26 19:21:41 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/03/01 23:46:41 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/03 05:23:16 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,11 @@ bool	expand_redirs(t_command *cmd)
 		redir->file = expanded;
 		if (redir->type == RED_IN)
 			if (access(redir->file, F_OK | R_OK) != 0)
+			{
 				return (error_msg_ret(FD_NOT_FOUND, redir->file, EXIT_FAILURE),
 					false);
+				redir->red_in_not_found = 1;
+			}
 		redir = redir->next;
 	}
 	return (true);

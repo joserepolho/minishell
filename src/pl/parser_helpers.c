@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_helpers.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
+/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 16:09:31 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/27 19:16:05 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/03/03 05:17:46 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ bool	assign_redir(t_command *command, char *redir_file,
 	if (!redir->file)
 		free_shell(MALLOC_ERROR, STDERR_FILENO, free_commands_wrapper, command);
 	redir->type = type;
+	redir->red_in_not_found = 0;
 	redir->next = NULL;
 	if (!command->redirs)
 		command->redirs = redir;

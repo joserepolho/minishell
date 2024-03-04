@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/22 02:29:00 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/02/27 22:18:54 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/04 01:59:42 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,7 @@ char	*expand_input_hd(char *s)
 char	*heredoc(t_mini *mini)
 {
 	int				fd;
+	pid_t			pid;
 	char			*file;
 	char			*input;
 	struct termios	termios;
@@ -93,25 +94,42 @@ char	*heredoc(t_mini *mini)
 	input = NULL;
 	file = ft_strdup("/tmp/hd");
 	fd = open(file, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	pid = fork();
 	if (fd < 0)
 	{
 		error_msg(FD_NOT_FOUND, "heredoc");
 		free_shell(NULL, 0, NULL, NULL);
 	}
-	while (1)
+	if (pid < 0)
+		free_shell(FORK_ERROR, EXIT_FAILURE, NULL, NULL);
+	if (pid == 0)
 	{
-		tcgetattr(STDIN_FILENO, &termios);
-		termios.c_cc[VQUIT] = _POSIX_VDISABLE;
-		tcsetattr(STDIN_FILENO, TCSANOW, &termios); // change stdin to ignore SIGQUIT
-		input = readline("> ");
-		if (!ft_strncmp(input, mini->hd_limiter, ft_strlen(input)) && input[0] != '\0')
-			break ;
-		if (!mini->lim_q)
-			input = expand_input_hd(input);
-		ft_putendl_fd(input, fd);
-		free(input);
+		signal(SIGINT, SIG_DFL);
+		while (1)
+		{
+			tcgetattr(STDIN_FILENO, &termios);
+			termios.c_cc[VQUIT] = _POSIX_VDISABLE;
+			tcsetattr(STDIN_FILENO, TCSANOW, &termios); // change stdin to ignore SIGQUIT
+			input = readline("> ");
+			if (!input || (!ft_strncmp(input, mini->hd_limiter, ft_strlen(input)) && input[0] != '\0'))
+			{
+				if (input)
+					free(input);
+				break ;
+			}
+			if (!mini->lim_q)
+				input = expand_input_hd(input);
+			ft_putendl_fd(input, fd);
+			ft_putendl_fd(ft_itoa(mini->command_ret), fd);
+			free(input);
+		}
+		close(fd);
 	}
-	dup2(mini->input.pip[1], STDOUT_FILENO);
-	close(fd);
+	else
+	{
+		waitpid(0, &mini->command_ret, 0);
+		if (mini->command_ret == SIGINT)
+			mini->command_ret = 130;
+	}
 	return (file);
 }
