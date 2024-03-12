@@ -1,0 +1,6 @@
+--leak-check=full
+--tool=drd
+--show-leak-kinds=all
+--suppressions=leak.supp
+--track-origins=yes
+--log-file=valgrind-out.txt

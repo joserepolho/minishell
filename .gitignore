@@ -1,2 +1,4 @@
 minishell
 obj/
+.idea/
+valgrind-out.txt
