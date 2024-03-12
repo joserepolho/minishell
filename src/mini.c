@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 14:44:32 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/03/03 05:15:36 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/07 02:28:35 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,9 @@ void	reset_mini(t_mini *mini)
 	mini->input.pipe_c = 0;
 	mini->exit_unavailability = 0;
 	mini->original_stdin_fd = 0;
-	if (mini->commands)
+	mini->home_tmp = NULL;
+	mini->if_cd = 0;
+	if (mini->commands && !mini->solo_pipe)
 	{
 		free_commands(mini->commands);
 		mini->commands = NULL;
@@ -41,7 +43,8 @@ void	reset_mini(t_mini *mini)
 		free(mini->output);
 		mini->output = NULL;
 	}
-	mini->commands = NULL;
+	if (!mini->solo_pipe)
+		mini->commands = NULL;
 }
 
 t_list	*set_env(char **env)

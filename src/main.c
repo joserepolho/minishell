@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:37 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/03/03 01:40:01 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/08 00:18:24 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int	main(int ac, char **av, char **env)
 			continue ;
 		}
 		add_history(mini()->input.raw_line);
-		if (input_error_check(mini()) && parse_input(mini()))
+		if (input_error_check(mini()) && parse_input(mini()) && !mini()->solo_pipe)
 			ft_execution(mini(), env);
 		reset_mini(mini());
 	}

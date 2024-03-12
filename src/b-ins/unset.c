@@ -55,4 +55,3 @@ void	bi_unset(t_mini *mini, char **av, int j)
 	}
 	mini->command_ret = 0;
 }
-

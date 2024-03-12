@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 20:28:47 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/27 22:17:51 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/07 20:09:07 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ bool	parse_input(t_mini *mini)
 	if (!semantic_checker(raw_commands))
 		return (free_list(raw_commands), false);
 	commands = ((int)mini->input.pipe_c) + 1;
+	if (mini->solo_pipe)
+		commands--;
 	i = 0;
 	j = 0;
 	while (commands > 0)
@@ -70,8 +72,7 @@ char	*get_next_section(char **line)
 	dquotes = false;
 	i = 0;
 	if (redir_size(*line) > 0)
-		return (i = redir_size(*line), (*line) += i, ft_substr(*line - i, 0,
-				i));
+		return (get_redir(line));
 	while (**line && (quotes || dquotes || redir_size(*line) == 0))
 	{
 		if (**line == QUOTE)
@@ -113,30 +114,16 @@ t_command	*construct_command(char **raw_commands, size_t end)
 {
 	t_command	*command;
 	size_t		i;
-	char		*lim;
 
 	command = malloc(sizeof(t_command));
 	if (!command)
 		free_shell(MALLOC_ERROR, STDERR_FILENO, NULL, NULL);
 	i = 0;
-	command->redirs = NULL;
-	command->args = NULL;
+	ft_memset(command, 0, sizeof(t_command));
 	while (i < end)
 	{
 		if (!update_command(command, raw_commands, &i, end))
 			return (free(command), NULL);
-		if ((int)i - 1 >= 0 && redir_size(raw_commands[i - 1]) == RED_AIN)
-		{
-			lim = ft_strdup(raw_commands[i]);
-			if (raw_commands[i][0] == QUOTE || raw_commands[i][0] == DQUOTE)
-			{
-				mini()->lim_q = 1;
-				lim[ft_strlen(lim) - 1] = '\0';
-				lim++;
-			}
-			mini()->hd_limiter = ft_strdup(lim);
-			free(lim);
-		}
 		i++;
 	}
 	if (command->args == NULL)

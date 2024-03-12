@@ -21,3 +21,11 @@ void	bi_pwd(void)
 	printf("%s\n", dir);
 	mini()->command_ret = 0;
 }
+
+void	export_add(t_mini *mini, char *av)
+{
+	t_list	*exp;
+
+	exp = ft_lstnew(ft_strdup((char *)av));
+	ft_lstadd_back(&mini->env_list, exp);
+}

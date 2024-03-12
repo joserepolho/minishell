@@ -6,24 +6,11 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 16:09:31 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/03/03 05:17:46 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/06 05:55:31 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-size_t	redir_size(char *line)
-{
-	enum e_redir_type	type;
-
-	type = redir_type(line);
-	if (type == RED_AIN || type == RED_AOUT)
-		return (2);
-	if (type == RED_IN || type == RED_OUT || (line != NULL && (*line == PIPE
-				|| *line == ' ')))
-		return (1);
-	return (0);
-}
 
 bool	assign_redir(t_command *command, char *redir_file,
 		enum e_redir_type type)
@@ -34,11 +21,12 @@ bool	assign_redir(t_command *command, char *redir_file,
 	redir = malloc(sizeof(t_redir));
 	if (!redir)
 		free_shell(MALLOC_ERROR, STDERR_FILENO, free_commands_wrapper, command);
+	if (!check_ambiguitity(redir, command, redir_file))
+		return (false);
 	redir->file = ft_strdup(redir_file);
 	if (!redir->file)
 		free_shell(MALLOC_ERROR, STDERR_FILENO, free_commands_wrapper, command);
 	redir->type = type;
-	redir->red_in_not_found = 0;
 	redir->next = NULL;
 	if (!command->redirs)
 		command->redirs = redir;
@@ -85,6 +73,8 @@ bool	update_command(t_command *command, char **raw_commands, size_t *i,
 	}
 	else
 	{
+		if (!ft_strncmp(raw_commands[*i], "cd", 3))
+			mini()->if_cd = 1;
 		ret = valid_cmd_arg(raw_commands[*i]);
 		if (!ret)
 		{
@@ -123,4 +113,17 @@ bool	add_arg(t_command *command, char *section)
 	free(command->args);
 	command->args = new_args;
 	return (true);
+}
+
+char	*get_redir(char **line)
+{
+	int		i;
+	char	*tmp;
+
+	i = redir_size(*line);
+	(*line) += i;
+	tmp = ft_substr(*line - i, 0, i);
+	if (redir_type(*line - i) == RED_OUT && *line && **line == PIPE)
+		(*line) += i;
+	return (tmp);
 }

@@ -6,7 +6,7 @@
 /*   By: tiagoliv <tiagoliv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 17:13:51 by tiagoliv          #+#    #+#             */
-/*   Updated: 2024/02/27 19:28:06 by tiagoliv         ###   ########.fr       */
+/*   Updated: 2024/03/07 18:50:17 by tiagoliv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,26 +32,14 @@ bool	valid_env_char(char c)
 	return (ft_isalnum(c) || c == '_');
 }
 
-bool	quoted_str(char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str && str[i])
-	{
-		if (*str == '\'' || *str == '\"')
-			return (true);
-		i++;
-	}
-	return (false);
-}
-
 bool	valid_cmd_arg(char *str)
 {
 	bool	quoted;
 	int		l;
 
-	quoted = quoted_str(str);
+	quoted = has_char_in_set(str, "\"\'");
+	if (!ft_strncmp(str, "$vari", 6) && mini()->if_cd)
+		quoted = true;
 	l = str_expander_len(str);
 	if (!quoted && l == 0)
 		return (false);
@@ -63,46 +51,4 @@ void	free_assign_null(void **ptr)
 	if (*ptr)
 		free(*ptr);
 	*ptr = NULL;
-}
-
-void	print_command(t_command *command)
-{
-	size_t		i;
-	t_redir		*redir;
-	t_command	*tmp;
-
-	i = 0;
-	if (ft_strlen(command->cmd_name) != 0)
-		DEBUG_MSG("print_command: ");
-	while (command->args && command->args[i])
-	{
-		printf("|%s| ", command->args[i]);
-		i++;
-	}
-	if (ft_strlen(command->cmd_name) != 0)
-		printf("\n");
-	tmp = command;
-	while (tmp)
-	{
-		redir = command->redirs;
-		while (redir)
-		{
-			DEBUG_MSG("redir:|%s| type:", redir->file);
-			if (redir->type)
-			{
-				if (redir->type == RED_IN)
-					printf("RED_IN\n");
-				else if (redir->type == RED_AIN)
-					printf("RED_AIN\n");
-				else if (redir->type == RED_OUT)
-					printf("RED_OUT\n");
-				else if (redir->type == RED_AOUT)
-					printf("RED_AOUT\n");
-			}
-			redir = redir->next;
-		}
-		tmp = tmp->next;
-		if (tmp)
-			DEBUG_MSG("output will be piped to:\n");
-	}
 }

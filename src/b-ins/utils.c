@@ -6,7 +6,7 @@
 /*   By: joaoribe <joaoribe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 03:56:01 by joaoribe          #+#    #+#             */
-/*   Updated: 2024/03/03 00:33:10 by joaoribe         ###   ########.fr       */
+/*   Updated: 2024/03/06 03:44:51 by joaoribe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,40 @@ void	built_in(t_mini *mini, t_command *cmd, int j)
 		bi_pwd();
 	else if (!ft_strncmp(cmd->cmd_name, "unset", 5))
 		bi_unset(mini, cmd->args, j);
-	else if (!ft_strncmp(cmd->cmd_name, "exit", 4) && !mini->exit_unavailability)
+	else if (!ft_strncmp(cmd->cmd_name, "exit", 4)
+		&& !mini->exit_unavailability)
 		bi_exit(mini, cmd->args, cmd->next != NULL);
+}
+
+t_list	*sort_list(t_list *lst)
+{
+	char	*swap;
+	t_list	*tmp;
+
+	tmp = lst;
+	while (lst->next != NULL)
+	{
+		if (ft_strncmp(lst->content, lst->next->content,
+				ft_strlen(lst->content) + 1) > 0)
+		{
+			swap = lst->content;
+			lst->content = lst->next->content;
+			lst->next->content = swap;
+			lst = tmp;
+		}
+		else
+			lst = lst->next;
+	}
+	lst = tmp;
+	return (lst);
+}
+
+int	ft_strlen_eq(char *s)
+{
+	int	i;
+
+	i = 0;
+	while (s[i] && s[i] != '=')
+		i++;
+	return (i);
 }
