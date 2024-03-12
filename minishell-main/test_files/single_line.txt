@@ -1,0 +1,4 @@
+echo "asd"'asd'	
+echo "asd"asd
+echo "'$asd'""'$?'"""
+exit
